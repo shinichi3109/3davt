@@ -5,6 +5,7 @@ import math
 from collections import Counter
 from pylab import savefig
 import cv2
+from backgroundremover.bg import remove
 
 
 def grayscale():
@@ -211,11 +212,25 @@ def convolution(img, kernel):
 
 def edge_detection():
     img = Image.open("static/img/img_now.jpg")
-    img_arr = np.asarray(img, dtype=np.int_)
-    kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
-    new_arr = convolution(img_arr, kernel)
-    new_img = Image.fromarray(new_arr)
-    new_img.save("static/img/img_now.jpg")
+    # img_arr = np.asarray(img, dtype=np.int_)
+    # kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+    # new_arr = convolution(img_arr, kernel)
+    # new_img = Image.fromarray(new_arr)
+    # new_img.save("static/img/img_now.jpg")
+    model_choices = ["u2net", "u2net_human_seg", "u2netp"]
+    f = open("static/img/img_now.jpg", "rb")
+    data = f.read()
+    img = remove(data, model_name=model_choices[0],
+                 alpha_matting=True,
+                 alpha_matting_foreground_threshold=240,
+                 alpha_matting_background_threshold=10,
+                 alpha_matting_erode_structure_size=10,
+                 alpha_matting_base_size=1000)
+    f.close()
+    f = open("static/img/img_now.jpg", "wb")
+    f.write(img)
+    f.close()
+    
 
 
 def blur():
